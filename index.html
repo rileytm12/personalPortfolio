@@ -1,0 +1,333 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Riley Martin — Aerospace engineering student at CU Boulder. Dynamic systems, controls, ROS2, and aerospace software." />
+  <title>Riley Martin | Aerospace Engineering Student</title>
+
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <!-- Tailwind CSS (CDN) -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Inter', 'system-ui', 'sans-serif'],
+          },
+          colors: {
+            accent: {
+              DEFAULT: '#2563eb',
+              dark: '#1d4ed8',
+            },
+          },
+        },
+      },
+    };
+  </script>
+
+  <!-- Smooth anchor scrolling (works without processing Tailwind layers) -->
+  <style>
+    html {
+      scroll-behavior: smooth;
+    }
+  </style>
+</head>
+
+<body class="font-sans text-gray-900 bg-white antialiased">
+
+  <!-- ========== Sticky Navigation ========== -->
+  <header class="sticky top-0 z-50 border-b border-gray-200/80 bg-white/95 backdrop-blur-sm transition-shadow duration-200">
+    <nav class="mx-auto flex max-w-5xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8" aria-label="Primary">
+      <a href="#hero" class="text-lg font-semibold tracking-tight text-gray-900 transition-colors hover:text-accent">RM</a>
+
+      <!-- Desktop menu -->
+      <ul class="hidden items-center gap-8 text-sm font-medium text-gray-600 md:flex">
+        <li><a href="#about" class="transition-colors hover:text-accent">About</a></li>
+        <li><a href="#projects" class="transition-colors hover:text-accent">Projects</a></li>
+        <li><a href="#experience" class="transition-colors hover:text-accent">Experience</a></li>
+        <li><a href="#contact" class="transition-colors hover:text-accent">Contact</a></li>
+      </ul>
+
+      <!-- Mobile menu button -->
+      <button
+        type="button"
+        id="menu-toggle"
+        class="inline-flex items-center justify-center rounded-md p-2 text-gray-700 transition-colors hover:bg-gray-100 hover:text-accent md:hidden"
+        aria-controls="mobile-menu"
+        aria-expanded="false"
+        aria-label="Open menu"
+      >
+        <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path id="icon-open" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
+          <path id="icon-close" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </nav>
+
+    <!-- Mobile menu panel -->
+    <div id="mobile-menu" class="hidden border-t border-gray-100 bg-white md:hidden">
+      <ul class="flex flex-col gap-1 px-4 py-3 text-base font-medium text-gray-700">
+        <li><a href="#about" class="block rounded-md px-3 py-2 transition-colors hover:bg-gray-50 hover:text-accent">About</a></li>
+        <li><a href="#projects" class="block rounded-md px-3 py-2 transition-colors hover:bg-gray-50 hover:text-accent">Projects</a></li>
+        <li><a href="#experience" class="block rounded-md px-3 py-2 transition-colors hover:bg-gray-50 hover:text-accent">Experience</a></li>
+        <li><a href="#contact" class="block rounded-md px-3 py-2 transition-colors hover:bg-gray-50 hover:text-accent">Contact</a></li>
+      </ul>
+    </div>
+  </header>
+
+  <main>
+    <!-- ========== Hero Section ========== -->
+    <section id="hero" class="scroll-mt-20 border-b border-gray-100 bg-gradient-to-b from-gray-50/80 to-white">
+      <div class="mx-auto max-w-5xl px-4 py-20 sm:px-6 sm:py-28 lg:px-8 lg:py-32">
+        <p class="mb-3 text-sm font-medium uppercase tracking-widest text-accent">Portfolio</p>
+        <h1 class="text-4xl font-bold tracking-tight text-gray-900 sm:text-5xl lg:text-6xl">Riley Martin</h1>
+        <p class="mt-3 text-xl font-medium text-gray-700 sm:text-2xl">Aerospace Engineering Student</p>
+        <p class="mt-2 text-base text-gray-500 sm:text-lg">University of Colorado Boulder · May 2026 · Boulder, CO</p>
+        <p class="mt-6 max-w-2xl text-lg leading-relaxed text-gray-600">
+          I focus on <strong class="font-semibold text-gray-800">dynamic systems and controls</strong>: applying state-space modeling, PID/fuzzy PID control, and Kalman filtering from simulation to embedded and ROS2-based systems. My experience spans multi-agent rover coordination and spacecraft ADCS integration. Interested in spacecraft control, robotics, UAVs, and team-driven engineering environments.
+        </p>
+        <div class="mt-10 flex flex-col gap-4 sm:flex-row sm:items-center">
+          <a
+            href="#projects"
+            class="inline-flex items-center justify-center rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-accent-dark hover:shadow-md"
+          >
+            View Projects
+          </a>
+          <a
+            href="#contact"
+            class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-6 py-3 text-sm font-semibold text-gray-900 transition duration-200 hover:border-accent hover:text-accent"
+          >
+            Contact Me
+          </a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== About Me ========== -->
+    <section id="about" class="scroll-mt-20 border-b border-gray-100 py-16 sm:py-20">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">About Me</h2>
+        <p class="mt-6 max-w-3xl text-base leading-relaxed text-gray-600">
+          I am a <strong class="font-medium text-gray-800">B.S. Aerospace Engineering</strong> student (minor in Engineering Management) at CU Boulder, graduating May 2026. My work spans <strong class="font-medium text-gray-800">controls, estimation, and aerospace software</strong>—from MATLAB/Simulink flight and orbit simulations to C++ and ROS2 on real hardware. I enjoy presenting technical results in academic and team settings and contributing in cross-disciplinary groups (structures, electrical, software).
+        </p>
+        <p class="mt-4 max-w-3xl text-sm leading-relaxed text-gray-600">
+          <span class="font-semibold text-gray-800">Interests:</span> dynamic control systems, UAVs, robotics, state-space modeling, and team-driven engineering environments.
+        </p>
+        <h3 class="mt-10 text-sm font-semibold uppercase tracking-wider text-gray-500">Technical skills</h3>
+        <p class="mt-3 text-sm font-medium text-gray-700">Programming</p>
+        <ul class="mt-2 flex flex-wrap gap-2">
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">C</li>
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">C++</li>
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">Python</li>
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">MATLAB / Simulink</li>
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">ROS2</li>
+        </ul>
+        <p class="mt-6 text-sm font-medium text-gray-700">Systems &amp; controls</p>
+        <ul class="mt-2 flex flex-wrap gap-2">
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">State-space modeling</li>
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">PID &amp; fuzzy PID</li>
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">Kalman filtering</li>
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">Dynamic system analysis</li>
+        </ul>
+        <p class="mt-6 text-sm font-medium text-gray-700">Tools &amp; platforms</p>
+        <ul class="mt-2 flex flex-wrap gap-2">
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">Git</li>
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">Unix / Linux</li>
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">OnShape (CAD)</li>
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">ANSYS (FEA)</li>
+          <li class="rounded-full border border-gray-200 bg-gray-50 px-4 py-2 text-sm font-medium text-gray-800 transition hover:border-accent/30 hover:bg-blue-50/50">Microsoft Office</li>
+        </ul>
+      </div>
+    </section>
+
+    <!-- ========== Projects ========== -->
+    <section id="projects" class="scroll-mt-20 border-b border-gray-100 bg-gray-50/50 py-16 sm:py-20">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Projects</h2>
+        <p class="mt-3 max-w-2xl text-gray-600">Senior design, coursework, and simulations—controls, software, and dynamics.</p>
+
+        <div class="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+          <!-- Project card: Senior capstone -->
+          <article class="group flex flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition duration-200 hover:border-accent/40 hover:shadow-md">
+            <p class="text-xs font-semibold uppercase tracking-wide text-accent">Senior project</p>
+            <h3 class="mt-2 text-lg font-semibold text-gray-900">Cooperative multi-rover control</h3>
+            <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600">Team capstone: path tracking in C++, fuzzy PID and Kalman filtering for wheel speeds and localization, and a multi-team ROS2 stack from waypoints to low-level control.</p>
+            <p class="mt-4 text-xs font-medium text-gray-500">C++ · ROS2 · Controls · MATLAB/Simulink</p>
+            <a
+              href="project-cooperative-rover.html"
+              class="mt-5 inline-flex w-full items-center justify-center rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-accent-dark hover:shadow-md sm:w-auto"
+            >
+              Deep dive
+            </a>
+          </article>
+          <article class="group flex flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition duration-200 hover:border-accent/40 hover:shadow-md">
+            <h3 class="text-lg font-semibold text-gray-900">Autonomous rover network</h3>
+            <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600">Developed a cooperative control approach for a rover network to identify and approach a target—tying perception goals to motion planning at the systems level.</p>
+            <p class="mt-4 text-xs font-medium text-gray-500">Controls · Systems</p>
+            <p class="mt-4 text-xs text-gray-500">Course project highlight.</p>
+          </article>
+          <article class="group flex flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition duration-200 hover:border-accent/40 hover:shadow-md">
+            <p class="text-xs font-semibold uppercase tracking-wide text-accent">Individual project</p>
+            <h3 class="mt-2 text-lg font-semibold text-gray-900">1D Kalman filter — rocket estimation</h3>
+            <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600">Fuse noisy acceleration and altitude measurements with a discrete-time Kalman filter to estimate altitude and velocity—model-based prediction and GNC-style sensor fusion.</p>
+            <p class="mt-4 text-xs font-medium text-gray-500">Python · Kalman filter · GNC</p>
+            <a
+              href="project-kalman-rocket.html"
+              class="mt-5 inline-flex w-full items-center justify-center rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-accent-dark hover:shadow-md sm:w-auto"
+            >
+              Deep dive
+            </a>
+          </article>
+          <article class="group flex flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition duration-200 hover:border-accent/40 hover:shadow-md">
+            <p class="text-xs font-semibold uppercase tracking-wide text-accent">Course project</p>
+            <h3 class="text-lg font-semibold text-gray-900">Australia Craft</h3>
+            <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600">C++ survival game featuring biome exploration, resource management, and probabilistic decision-making in a dynamically generated world with file-driven content.</p>
+            <p class="mt-4 text-xs font-medium text-gray-500">C++ · STL · File I/O · OOP</p>
+            <a
+              href="project-australia-craft.html"
+              class="mt-5 inline-flex w-full items-center justify-center rounded-lg bg-accent px-4 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-accent-dark hover:shadow-md sm:w-auto"
+            >
+              Deep dive
+            </a>
+          </article>
+          <article class="group flex flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition duration-200 hover:border-accent/40 hover:shadow-md">
+            <h3 class="text-lg font-semibold text-gray-900">Orbital &amp; trajectory simulation</h3>
+            <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600">MATLAB simulations of 2D/3D spacecraft motion, perturbations (drag, SRP), and trajectory studies to validate mission feasibility.</p>
+            <p class="mt-4 text-xs font-medium text-gray-500">MATLAB · Orbital mechanics</p>
+            <p class="mt-4 text-xs text-gray-500">Coursework — Orbital Mechanics.</p>
+          </article>
+          <article class="group flex flex-col rounded-xl border border-gray-200 bg-white p-6 shadow-sm transition duration-200 hover:border-accent/40 hover:shadow-md">
+            <h3 class="text-lg font-semibold text-gray-900">Aircraft &amp; quadcopter models</h3>
+            <p class="mt-2 flex-1 text-sm leading-relaxed text-gray-600">State-space simulation for quadcopters and fixed-wing aircraft; trim, wind effects, and 3D rigid-body motion with coordinate transforms.</p>
+            <p class="mt-4 text-xs font-medium text-gray-500">MATLAB · Aircraft dynamics</p>
+            <p class="mt-4 text-xs text-gray-500">Coursework — Aircraft Dynamics.</p>
+          </article>
+        </div>
+      </div>
+    </section>
+
+    <!-- ========== Experience / Education ========== -->
+    <section id="experience" class="scroll-mt-20 py-16 sm:py-20">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Experience &amp; Education</h2>
+        <p class="mt-3 text-gray-600">Roles in spacecraft systems and senior design, plus degree progress at CU Boulder.</p>
+
+        <ol class="relative mt-10 border-l border-gray-200 pl-8">
+          <li class="mb-10">
+            <span class="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border-2 border-white bg-accent ring-2 ring-gray-100"></span>
+            <time class="text-sm font-medium text-gray-500">Aug 2025 – Present</time>
+            <h3 class="mt-1 text-lg font-semibold text-gray-900">Senior Project — Dynamics &amp; Controls Engineer</h3>
+            <p class="text-gray-600">University of Colorado Boulder · Building a cooperative control system for a network of three mobile rovers: C++ path tracking, fuzzy PID and Kalman filtering for wheel speeds and localization, and a large-scale ROS2 architecture from waypoint generation to autonomous coordination.</p>
+          </li>
+          <li class="mb-10">
+            <span class="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border-2 border-white bg-gray-300 ring-2 ring-gray-100"></span>
+            <time class="text-sm font-medium text-gray-500">July 2025 – March 2026</time>
+            <h3 class="mt-1 text-lg font-semibold text-gray-900">CDH Team Member · SWARM-EX</h3>
+            <p class="text-gray-600">Cleaned and passed data output from the XACT-15 control system to the ground station; designed and maintained onboard architecture for routing, formatting, and storing spacecraft telemetry, science, and command data.</p>
+          </li>
+          <li class="mb-10">
+            <span class="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border-2 border-white bg-gray-300 ring-2 ring-gray-100"></span>
+            <time class="text-sm font-medium text-gray-500">April 2025 – March 2026</time>
+            <h3 class="mt-1 text-lg font-semibold text-gray-900">ADCS Team Member · SWARM-EX</h3>
+            <p class="text-gray-600">Integrated the XACT-15 control system into a 3U CubeSat for precision 3-axis stabilization; evaluating performance via simulation and hardware-in-the-loop testing with mechanical, electrical, and software teams.</p>
+          </li>
+          <li>
+            <span class="absolute -left-1.5 mt-1.5 h-3 w-3 rounded-full border-2 border-white bg-gray-300 ring-2 ring-gray-100"></span>
+            <time class="text-sm font-medium text-gray-500">May 2026 </time>
+            <h3 class="mt-1 text-lg font-semibold text-gray-900">B.S. Aerospace Engineering · Minor Engineering Management</h3>
+            <p class="text-gray-600">University of Colorado Boulder — College of Engineering &amp; Applied Science. Coursework in computational methods (C++, numerical methods, Linux), dynamics &amp; controls (PID, state-space, MATLAB), orbital mechanics, aircraft dynamics, and aerospace software (C, MATLAB, Git).</p>
+          </li>
+        </ol>
+      </div>
+    </section>
+
+    <!-- ========== Contact ========== -->
+    <section id="contact" class="scroll-mt-20 border-t border-gray-100 bg-gray-50/50 py-16 sm:py-20">
+      <div class="mx-auto max-w-5xl px-4 sm:px-6 lg:px-8">
+        <h2 class="text-2xl font-bold tracking-tight text-gray-900 sm:text-3xl">Contact</h2>
+        <p class="mt-3 text-gray-600">Reach out about potential opportunities.</p>
+
+        <div class="mt-10 grid gap-10 lg:grid-cols-2">
+          <div>
+            <p class="text-sm font-medium text-gray-500">Email</p>
+            <a href="mailto:Rileytmartin36@gmail.com" class="mt-1 block text-lg font-medium text-accent transition hover:text-accent-dark">Rileytmartin36@gmail.com</a>
+            <p class="mt-6 text-sm font-medium text-gray-500">Phone</p>
+            <a href="tel:+16129167157" class="mt-1 block text-lg font-medium text-gray-800 transition hover:text-accent">612-916-7157</a>
+            <p class="mt-6 text-sm text-gray-600">Boulder, CO</p>
+            <div class="mt-8">
+              <a href="https://www.linkedin.com/in/riley-martin-a543b7214" target="_blank" rel="noopener noreferrer" class="inline-flex items-center rounded-lg border border-gray-200 bg-white px-4 py-2 text-sm font-semibold text-gray-800 transition hover:border-accent hover:text-accent">LinkedIn profile</a>
+            </div>
+          </div>
+
+          <form class="space-y-4" action="#" method="post" onsubmit="return false;" aria-label="Contact form (demo)">
+            <div>
+              <label for="name" class="block text-sm font-medium text-gray-700">Name</label>
+              <input type="text" id="name" name="name" autocomplete="name" class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" placeholder="Jane Doe" />
+            </div>
+            <div>
+              <label for="email" class="block text-sm font-medium text-gray-700">Email</label>
+              <input type="email" id="email" name="email" autocomplete="email" class="mt-1 w-full rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" placeholder="you@example.com" />
+            </div>
+            <div>
+              <label for="message" class="block text-sm font-medium text-gray-700">Message</label>
+              <textarea id="message" name="message" rows="4" class="mt-1 w-full resize-y rounded-lg border border-gray-300 px-4 py-2.5 text-gray-900 shadow-sm transition focus:border-accent focus:outline-none focus:ring-2 focus:ring-accent/20" placeholder="Write your message…"></textarea>
+            </div>
+            <button type="submit" class="w-full rounded-lg bg-accent px-6 py-3 text-sm font-semibold text-white transition duration-200 hover:bg-accent-dark sm:w-auto">Send message</button>
+          </form>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- ========== Footer ========== -->
+  <footer class="border-t border-gray-200 bg-white py-8">
+    <div class="mx-auto max-w-5xl px-4 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
+      <p>&copy; <span id="footer-year">2026</span> Riley Martin. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Minimal JS: mobile menu + hamburger icon + footer year -->
+  <script>
+    (function () {
+      var btn = document.getElementById('menu-toggle');
+      var panel = document.getElementById('mobile-menu');
+      var iconOpen = document.getElementById('icon-open');
+      var iconClose = document.getElementById('icon-close');
+
+      function setOpen(open) {
+        if (!btn || !panel) return;
+        btn.setAttribute('aria-expanded', open ? 'true' : 'false');
+        btn.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+        panel.classList.toggle('hidden', !open);
+        if (iconOpen && iconClose) {
+          iconOpen.classList.toggle('hidden', open);
+          iconClose.classList.toggle('hidden', !open);
+        }
+      }
+
+      if (btn) {
+        btn.addEventListener('click', function () {
+          var open = btn.getAttribute('aria-expanded') === 'true';
+          setOpen(!open);
+        });
+      }
+
+      // Close menu when a link is clicked (mobile)
+      if (panel) {
+        panel.querySelectorAll('a[href^="#"]').forEach(function (link) {
+          link.addEventListener('click', function () { setOpen(false); });
+        });
+      }
+
+      var y = document.getElementById('footer-year');
+      if (y) y.textContent = String(new Date().getFullYear());
+    })();
+  </script>
+</body>
+</html>
