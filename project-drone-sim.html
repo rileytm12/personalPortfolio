@@ -1,0 +1,261 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="Physics-based quadrotor simulation with quaternion dynamics and cascaded PID control — Riley Martin." />
+  <title>Autonomous UAV Simulation &amp; Control | Riley Martin</title>
+
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: { sans: ['Inter', 'system-ui', 'sans-serif'] },
+          colors: { accent: { DEFAULT: '#2563eb', dark: '#1d4ed8' } },
+        },
+      },
+    };
+  </script>
+  <style>
+    html { scroll-behavior: smooth; }
+  </style>
+</head>
+
+<body class="font-sans text-gray-900 bg-white antialiased">
+
+  <header class="sticky top-0 z-50 border-b border-gray-200/80 bg-white/95 backdrop-blur-sm">
+    <nav class="mx-auto flex max-w-3xl items-center justify-between px-4 py-4 sm:px-6 lg:px-8" aria-label="Project page">
+      <a href="index.html" class="text-lg font-semibold tracking-tight text-gray-900 transition-colors hover:text-accent">RM</a>
+      <a href="index.html#projects" class="inline-flex items-center gap-2 text-sm font-medium text-gray-600 transition hover:text-accent">
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+        </svg>
+        Back to projects
+      </a>
+    </nav>
+  </header>
+
+  <article class="mx-auto max-w-3xl px-4 pb-20 pt-10 sm:px-6 lg:px-8">
+    <header class="border-b border-gray-100 pb-10">
+      <p class="text-xs font-semibold uppercase tracking-wide text-accent">Individual project · Deep dive</p>
+      <h1 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Autonomous UAV simulation &amp; control</h1>
+      <p class="mt-3 text-lg text-gray-600">
+        A physics-based quadrotor simulation with cascaded control architecture, trajectory tracking, and UAV-inspired design.
+      </p>
+      <ul class="mt-6 flex flex-wrap gap-2 text-sm">
+        <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Python</li>
+        <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Controls</li>
+        <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Simulation</li>
+        <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Estimation (planned)</li>
+      </ul>
+      <p class="mt-6 text-sm text-gray-500">
+        <span class="font-semibold text-gray-700">Role:</span> Dynamics, Controls, Software Architecture · 2026
+      </p>
+      <a
+        href="https://github.com/rileytm12/6DOF_Drone_Sim.git"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="mt-4 inline-flex items-center justify-center rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-accent-dark"
+      >
+        GitHub repository
+      </a>
+    </header>
+
+    <!-- ========== Overview ========== -->
+    <section class="mt-12" aria-labelledby="overview-heading">
+      <h2 id="overview-heading" class="text-xl font-bold text-gray-900">Overview</h2>
+      <div class="mt-4 space-y-4 text-base leading-relaxed text-gray-600">
+        <p>
+          This project focuses on building a high-fidelity quadrotor (UAV) simulation from first principles, with an emphasis on control system design and realistic flight behavior. The system models full 6-DOF rigid body dynamics using quaternions for attitude representation and simulates the response of a drone to control inputs in real time.
+        </p>
+        <p>
+          The primary objective is to replicate the core architecture of real autonomous UAV systems, including cascaded control loops, trajectory tracking, and modular software structure. Rather than treating the drone as a black box, the project builds each component—from dynamics to control—explicitly to develop a deeper understanding of UAV behavior.
+        </p>
+      </div>
+    </section>
+
+    <!-- ========== My work ========== -->
+    <section class="mt-12" aria-labelledby="my-work-heading">
+      <h2 id="my-work-heading" class="text-xl font-bold text-gray-900">My work on the project</h2>
+      <div class="mt-6 space-y-8 text-base leading-relaxed text-gray-600">
+
+        <div>
+          <h3 class="font-semibold text-gray-900">Dynamics modeling</h3>
+          <p class="mt-2">
+            Developed a full nonlinear quadrotor dynamics model in Python, including translational and rotational motion. Attitude is represented using quaternions to avoid singularities, with conversion to Euler angles for control.
+          </p>
+          <p class="mt-2">
+            Implemented a custom numerical integrator to propagate the system state over time, enabling stable simulation of vehicle motion under varying control inputs.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-gray-900">Cascaded control system design</h3>
+          <p class="mt-2">
+            Designed and implemented a cascaded UAV control architecture, separating position and attitude control:
+          </p>
+          <ul class="mt-3 list-disc space-y-2 pl-5">
+            <li><span class="font-semibold text-gray-800">Outer loop (position control):</span> computes desired accelerations based on position and velocity error.</li>
+            <li><span class="font-semibold text-gray-800">Inner loop (attitude control):</span> tracks desired roll, pitch, and yaw using PID controllers to generate body torques.</li>
+          </ul>
+          <p class="mt-4">
+            Position commands are mapped to desired orientation using small-angle approximations:
+          </p>
+          <div class="mt-3 space-y-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 font-mono text-sm text-gray-800">
+            <p>a<sub>x</sub> &rarr; &theta;<sub>des</sub> (pitch)</p>
+            <p>a<sub>y</sub> &rarr; &phi;<sub>des</sub> (roll)</p>
+          </div>
+          <p class="mt-3">This mirrors the control strategy used in real quadrotors.</p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-gray-900">PID control &amp; tuning</h3>
+          <p class="mt-2">
+            Implemented reusable PID controller classes and applied them across all control axes (<span class="font-mono text-sm">x</span>, <span class="font-mono text-sm">y</span>, <span class="font-mono text-sm">z</span>, roll, pitch, yaw).
+          </p>
+          <p class="mt-3 font-medium text-gray-800">Tuned gains to achieve:</p>
+          <ul class="mt-2 list-disc space-y-1 pl-5">
+            <li>fast stabilization from large initial disturbances</li>
+            <li>minimal oscillation in angular rates</li>
+            <li>stable hover and position tracking</li>
+          </ul>
+          <p class="mt-3 font-medium text-gray-800">Debugged instability issues such as:</p>
+          <ul class="mt-2 list-disc space-y-1 pl-5">
+            <li>large initial acceleration spikes</li>
+            <li>oscillatory roll/pitch behavior</li>
+            <li>improper coupling between translational and rotational dynamics</li>
+          </ul>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-gray-900">Trajectory tracking &amp; control integration</h3>
+          <p class="mt-2">
+            Extended the controller from simple setpoint stabilization to full position-based navigation, enabling the drone to move to arbitrary <span class="font-mono text-sm">(x, y, z)</span> coordinates.
+          </p>
+          <p class="mt-3 font-medium text-gray-800">Implemented:</p>
+          <ul class="mt-2 list-disc space-y-1 pl-5">
+            <li>velocity feedback in position control loops</li>
+            <li>conversion from desired acceleration to attitude commands</li>
+            <li>thrust control for altitude stabilization</li>
+          </ul>
+          <p class="mt-3">
+            Structured the system to support time-based trajectory inputs (position, velocity, acceleration), aligning with real UAV trajectory tracking methods.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-gray-900">Software architecture</h3>
+          <p class="mt-2">
+            Refactored the project into a modular structure inspired by real UAV flight stacks:
+          </p>
+          <div class="mt-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4">
+<pre class="min-w-[18rem] whitespace-pre font-mono text-[0.7rem] leading-relaxed text-gray-700 sm:min-w-0 sm:text-sm">drone-sim/
+├── drone_main.py        # simulation loop, logging, plotting
+├── dynamics_fun.py      # 6-DOF rigid body dynamics (quaternion)
+├── integrator_fun.py    # numerical state integrator
+├── controllers/
+│   ├── innerLoop.py     # cascaded position + attitude controller
+│   └── PID.py           # reusable PID class
+└── transform/           # helper functions (quat &lt;-&gt; Euler, body-to-global, mixer, etc.)</pre>
+          </div>
+          <p class="mt-4 font-medium text-gray-800">Separated control logic from simulation by:</p>
+          <ul class="mt-2 list-disc space-y-1 pl-5">
+            <li>encapsulating the inner-loop controller in its own module</li>
+            <li>passing persistent PID controller objects across time steps</li>
+            <li>structuring inputs as <span class="font-mono text-sm">(state, reference, parameters)</span></li>
+          </ul>
+          <p class="mt-3">
+            This improves scalability and mirrors real systems such as
+            <a href="https://px4.io/" target="_blank" rel="noopener noreferrer" class="font-medium text-accent hover:text-accent-dark">PX4 Autopilot</a>
+            and
+            <a href="https://ardupilot.org/" target="_blank" rel="noopener noreferrer" class="font-medium text-accent hover:text-accent-dark">ArduPilot</a>.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-gray-900">AI-assisted development workflow</h3>
+          <p class="mt-2">
+            Used AI tools (primarily Claude via terminal) to accelerate development and debugging, including:
+          </p>
+          <ul class="mt-3 list-disc space-y-1 pl-5">
+            <li>rapid iteration on control architectures</li>
+            <li>diagnosing instability and tuning issues</li>
+            <li>restructuring code into modular components</li>
+            <li>validating control logic against expected UAV behavior</li>
+          </ul>
+          <p class="mt-3">
+            AI was used as an engineering assistant, not a replacement for understanding—each component was derived, implemented, and validated independently.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-gray-900">Integration &amp; testing</h3>
+          <p class="mt-2 font-medium text-gray-800">Validated controller performance through simulation by:</p>
+          <ul class="mt-2 list-disc space-y-1 pl-5">
+            <li>initializing the drone at large attitude disturbances (e.g., 45&deg; roll/pitch)</li>
+            <li>verifying rapid stabilization to zero attitude</li>
+            <li>testing position convergence to arbitrary reference points</li>
+            <li>comparing desired vs. actual accelerations to evaluate controller behavior</li>
+          </ul>
+          <p class="mt-4 font-medium text-gray-800">Used data visualization (Matplotlib) to analyze:</p>
+          <ul class="mt-2 list-disc space-y-1 pl-5">
+            <li>position, velocity, and attitude over time</li>
+            <li>control inputs and system response</li>
+            <li>tracking performance and transient behavior</li>
+          </ul>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ========== Results ========== -->
+    <section class="mt-12" aria-labelledby="results-heading">
+      <h2 id="results-heading" class="text-xl font-bold text-gray-900">Results &amp; lessons learned</h2>
+      <ul class="mt-4 list-disc space-y-3 pl-5 text-base leading-relaxed text-gray-600">
+        <li>Cascaded control significantly improves stability and modularity compared to single-loop designs.</li>
+        <li>Mapping acceleration to attitude is critical for realistic quadrotor behavior.</li>
+        <li>Controller tuning must account for coupling between translational and rotational dynamics.</li>
+        <li>Numerical artifacts (e.g., acceleration spikes) can arise from initialization and must be carefully interpreted.</li>
+        <li>Clean software architecture is essential as system complexity grows.</li>
+      </ul>
+    </section>
+
+    <!-- ========== Next steps ========== -->
+    <section class="mt-12" aria-labelledby="next-steps-heading">
+      <h2 id="next-steps-heading" class="text-xl font-bold text-gray-900">Next steps</h2>
+      <ul class="mt-4 list-disc space-y-2 pl-5 text-base leading-relaxed text-gray-600">
+        <li>Implement outer-loop trajectory generation (splines / minimum-jerk paths).</li>
+        <li>Add state estimation using a Kalman filter.</li>
+        <li>Introduce disturbances (wind, sensor noise) for realism.</li>
+        <li>Expand to waypoint navigation and autonomous mission planning.</li>
+      </ul>
+    </section>
+
+    <footer class="mt-16 border-t border-gray-100 pt-10">
+      <p class="text-sm text-gray-500">Questions about this project?</p>
+      <div class="mt-4 flex flex-wrap gap-3">
+        <a href="index.html#contact" class="inline-flex items-center justify-center rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-sm transition duration-200 hover:bg-accent-dark">Contact me</a>
+        <a href="index.html#projects" class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-2.5 text-sm font-semibold text-gray-900 transition hover:border-accent hover:text-accent">All projects</a>
+      </div>
+    </footer>
+  </article>
+
+  <footer class="border-t border-gray-200 bg-white py-8">
+    <div class="mx-auto max-w-3xl px-4 text-center text-sm text-gray-500 sm:px-6 lg:px-8">
+      <p>&copy; <span id="footer-year">2026</span> Riley Martin</p>
+    </div>
+  </footer>
+
+  <script>
+    (function () {
+      var y = document.getElementById('footer-year');
+      if (y) y.textContent = String(new Date().getFullYear());
+    })();
+  </script>
+</body>
+</html>
