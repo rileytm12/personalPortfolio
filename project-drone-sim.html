@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="Physics-based quadrotor simulation with quaternion dynamics and cascaded PID control — Riley Martin." />
+  <meta name="description" content="High-fidelity 6-DOF quadrotor simulation with quaternion dynamics, cascaded PID control, and quintic trajectory generation — Riley Martin." />
   <title>Autonomous UAV Simulation &amp; Control | Riley Martin</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -45,16 +45,17 @@
       <p class="text-xs font-semibold uppercase tracking-wide text-accent">Individual project · Deep dive</p>
       <h1 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Autonomous UAV simulation &amp; control</h1>
       <p class="mt-3 text-lg text-gray-600">
-        A physics-based quadrotor simulation with cascaded control architecture, trajectory tracking, and UAV-inspired design.
+        A first-principles 6-DOF quadrotor simulation with cascaded control, quintic trajectory generation, and a modular flight-stack architecture.
       </p>
       <ul class="mt-6 flex flex-wrap gap-2 text-sm">
         <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Python</li>
         <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Controls</li>
+        <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Trajectory generation</li>
         <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Simulation</li>
         <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Estimation (planned)</li>
       </ul>
       <p class="mt-6 text-sm text-gray-500">
-        <span class="font-semibold text-gray-700">Role:</span> Dynamics, Controls, Software Architecture · 2026
+        <span class="font-semibold text-gray-700">Role:</span> Dynamics, Controls, Trajectory Planning, Software Architecture · 2026
       </p>
       <a
         href="https://github.com/rileytm12/6DOF_Drone_Sim.git"
@@ -71,10 +72,13 @@
       <h2 id="overview-heading" class="text-xl font-bold text-gray-900">Overview</h2>
       <div class="mt-4 space-y-4 text-base leading-relaxed text-gray-600">
         <p>
-          This project focuses on building a high-fidelity quadrotor (UAV) simulation from first principles, with an emphasis on control system design and realistic flight behavior. The system models full 6-DOF rigid body dynamics using quaternions for attitude representation and simulates the response of a drone to control inputs in real time.
+          This project develops a high-fidelity quadrotor (UAV) simulation from first principles, with a focus on control system design, trajectory generation, and realistic autonomous flight behavior. The system models full 6-DOF rigid body dynamics using quaternion-based attitude representation and simulates real-time vehicle response to control inputs.
         </p>
         <p>
-          The primary objective is to replicate the core architecture of real autonomous UAV systems, including cascaded control loops, trajectory tracking, and modular software structure. Rather than treating the drone as a black box, the project builds each component—from dynamics to control—explicitly to develop a deeper understanding of UAV behavior.
+          The project evolves beyond simple setpoint stabilization into a structured autonomous control stack, incorporating trajectory-based waypoint navigation and a cascaded control architecture. Instead of commanding discrete position targets, the system generates smooth, time-parameterized trajectories (position, velocity, acceleration), enabling physically consistent and dynamically feasible motion.
+        </p>
+        <p>
+          The goal is to mirror the architecture of real UAV flight systems by explicitly building each layer&mdash;from dynamics to trajectory planning&mdash;while maintaining a modular and extensible software design.
         </p>
       </div>
     </section>
@@ -86,66 +90,75 @@
 
         <div>
           <h3 class="font-semibold text-gray-900">Dynamics modeling</h3>
-          <p class="mt-2">
-            Developed a full nonlinear quadrotor dynamics model in Python, including translational and rotational motion. Attitude is represented using quaternions to avoid singularities, with conversion to Euler angles for control.
-          </p>
-          <p class="mt-2">
-            Implemented a custom numerical integrator to propagate the system state over time, enabling stable simulation of vehicle motion under varying control inputs.
-          </p>
+          <ul class="mt-2 list-disc space-y-2 pl-5">
+            <li>Developed a full nonlinear quadrotor dynamics model in Python, including coupled translational and rotational motion.</li>
+            <li>Implemented quaternion-based attitude representation to avoid singularities, with conversion to Euler angles for control interpretation.</li>
+            <li>Built a custom numerical integrator to propagate system state, enabling stable simulation under aggressive maneuvers and disturbances.</li>
+          </ul>
         </div>
 
         <div>
           <h3 class="font-semibold text-gray-900">Cascaded control system design</h3>
           <p class="mt-2">
-            Designed and implemented a cascaded UAV control architecture, separating position and attitude control:
+            Designed and implemented a multi-layer UAV control architecture:
           </p>
           <ul class="mt-3 list-disc space-y-2 pl-5">
-            <li><span class="font-semibold text-gray-800">Outer loop (position control):</span> computes desired accelerations based on position and velocity error.</li>
+            <li><span class="font-semibold text-gray-800">Outer loop (position control):</span> computes desired accelerations from trajectory tracking error.</li>
             <li><span class="font-semibold text-gray-800">Inner loop (attitude control):</span> tracks desired roll, pitch, and yaw using PID controllers to generate body torques.</li>
           </ul>
           <p class="mt-4">
-            Position commands are mapped to desired orientation using small-angle approximations:
+            Position control follows a feedback + feedforward structure:
+          </p>
+          <div class="mt-3 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-center font-mono text-sm text-gray-800">
+            a<sub>cmd</sub> = K<sub>p</sub>(x<sub>des</sub> &minus; x) + K<sub>d</sub>(v<sub>des</sub> &minus; v) + a<sub>des</sub>
+          </div>
+          <p class="mt-4">
+            Desired accelerations are mapped to attitude and thrust commands using quadrotor dynamics:
           </p>
           <div class="mt-3 space-y-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 font-mono text-sm text-gray-800">
             <p>a<sub>x</sub> &rarr; &theta;<sub>des</sub> (pitch)</p>
             <p>a<sub>y</sub> &rarr; &phi;<sub>des</sub> (roll)</p>
+            <p>a<sub>z</sub> &rarr; thrust</p>
           </div>
-          <p class="mt-3">This mirrors the control strategy used in real quadrotors.</p>
+          <p class="mt-3">
+            This structure enables the controller to track dynamically consistent trajectories rather than static setpoints.
+          </p>
+        </div>
+
+        <div>
+          <h3 class="font-semibold text-gray-900">Trajectory generation &amp; waypoint navigation</h3>
+          <p class="mt-2">
+            Extended the system from point-to-point control to trajectory-based autonomous navigation.
+          </p>
+          <ul class="mt-3 list-disc space-y-2 pl-5">
+            <li>Implemented quintic polynomial trajectory generation between waypoints.</li>
+            <li>Ensured continuity in position, velocity, and acceleration.</li>
+            <li>Generated time-parameterized trajectories <span class="font-mono text-sm">x(t), v(t), a(t)</span>.</li>
+            <li>Designed a waypoint manager that advances when proximity thresholds are met and resets trajectory timing for each segment.</li>
+            <li>Introduced time-scaling (<span class="font-mono text-sm">T</span> selection) based on distance, velocity, and acceleration constraints to ensure smooth, physically feasible motion.</li>
+          </ul>
+          <p class="mt-3">
+            This approach eliminates discontinuities in acceleration and significantly improves tracking performance, stability, and realism compared to direct waypoint commands.
+          </p>
         </div>
 
         <div>
           <h3 class="font-semibold text-gray-900">PID control &amp; tuning</h3>
-          <p class="mt-2">
-            Implemented reusable PID controller classes and applied them across all control axes (<span class="font-mono text-sm">x</span>, <span class="font-mono text-sm">y</span>, <span class="font-mono text-sm">z</span>, roll, pitch, yaw).
-          </p>
+          <ul class="mt-2 list-disc space-y-2 pl-5">
+            <li>Implemented reusable PID controllers for all translational and rotational axes.</li>
+          </ul>
           <p class="mt-3 font-medium text-gray-800">Tuned gains to achieve:</p>
           <ul class="mt-2 list-disc space-y-1 pl-5">
-            <li>fast stabilization from large initial disturbances</li>
-            <li>minimal oscillation in angular rates</li>
-            <li>stable hover and position tracking</li>
+            <li>fast recovery from large disturbances</li>
+            <li>minimal oscillation in attitude</li>
+            <li>stable trajectory tracking under wind disturbances</li>
           </ul>
-          <p class="mt-3 font-medium text-gray-800">Debugged instability issues such as:</p>
+          <p class="mt-3 font-medium text-gray-800">Debugged and resolved:</p>
           <ul class="mt-2 list-disc space-y-1 pl-5">
-            <li>large initial acceleration spikes</li>
-            <li>oscillatory roll/pitch behavior</li>
-            <li>improper coupling between translational and rotational dynamics</li>
+            <li>acceleration spikes from discontinuous references</li>
+            <li>oscillatory coupling between translation and rotation</li>
+            <li>instability from overly aggressive trajectory timing</li>
           </ul>
-        </div>
-
-        <div>
-          <h3 class="font-semibold text-gray-900">Trajectory tracking &amp; control integration</h3>
-          <p class="mt-2">
-            Extended the controller from simple setpoint stabilization to full position-based navigation, enabling the drone to move to arbitrary <span class="font-mono text-sm">(x, y, z)</span> coordinates.
-          </p>
-          <p class="mt-3 font-medium text-gray-800">Implemented:</p>
-          <ul class="mt-2 list-disc space-y-1 pl-5">
-            <li>velocity feedback in position control loops</li>
-            <li>conversion from desired acceleration to attitude commands</li>
-            <li>thrust control for altitude stabilization</li>
-          </ul>
-          <p class="mt-3">
-            Structured the system to support time-based trajectory inputs (position, velocity, acceleration), aligning with real UAV trajectory tracking methods.
-          </p>
         </div>
 
         <div>
@@ -154,23 +167,30 @@
             Refactored the project into a modular structure inspired by real UAV flight stacks:
           </p>
           <div class="mt-4 overflow-x-auto rounded-lg border border-gray-200 bg-gray-50 p-4">
-<pre class="min-w-[18rem] whitespace-pre font-mono text-[0.7rem] leading-relaxed text-gray-700 sm:min-w-0 sm:text-sm">drone-sim/
-├── drone_main.py        # simulation loop, logging, plotting
-├── dynamics_fun.py      # 6-DOF rigid body dynamics (quaternion)
-├── integrator_fun.py    # numerical state integrator
+<pre class="min-w-[18rem] whitespace-pre font-mono text-[0.7rem] leading-relaxed text-gray-700 sm:min-w-0 sm:text-sm">6DOF_Drone_Sim/
+├── drone_main.py                       # simulation loop, logging, plotting
+├── dynamics_fun.py                     # 6-DOF rigid body dynamics (quaternion)
+├── integrator_fun.py                   # numerical state integrator
+├── disturbances_fun.py                 # wind / gust disturbance model
 ├── controllers/
-│   ├── innerLoop.py     # cascaded position + attitude controller
-│   └── PID.py           # reusable PID class
-└── transform/           # helper functions (quat &lt;-&gt; Euler, body-to-global, mixer, etc.)</pre>
+│   ├── outerLoop.py                    # position control + waypoint manager
+│   ├── innerLoop.py                    # attitude control (roll, pitch, yaw)
+│   ├── trajectoryGeneration_fun.py     # quintic polynomial trajectory generator
+│   └── PID.py                          # reusable PID class with anti-windup
+└── transform/
+    ├── quat2euler_fun.py               # quaternion &rarr; Euler angles
+    ├── euler2quat_fun.py               # Euler angles &rarr; quaternion
+    ├── body2global_fun.py              # body &rarr; world frame rotation
+    ├── angularAccel_fun.py             # rotational dynamics (Euler&rsquo;s equation)
+    └── Tcalc_fun.py                    # mixer: total thrust + torques &rarr; rotor thrusts</pre>
           </div>
-          <p class="mt-4 font-medium text-gray-800">Separated control logic from simulation by:</p>
-          <ul class="mt-2 list-disc space-y-1 pl-5">
-            <li>encapsulating the inner-loop controller in its own module</li>
-            <li>passing persistent PID controller objects across time steps</li>
-            <li>structuring inputs as <span class="font-mono text-sm">(state, reference, parameters)</span></li>
+          <ul class="mt-4 list-disc space-y-1 pl-5">
+            <li>Separated trajectory generation, control, and dynamics into independent modules.</li>
+            <li>Structured interfaces as <span class="font-mono text-sm">(state, reference, parameters)</span>.</li>
+            <li>Maintained persistent controller and trajectory state across simulation steps.</li>
           </ul>
           <p class="mt-3">
-            This improves scalability and mirrors real systems such as
+            This design improves scalability and reflects real-world systems such as
             <a href="https://px4.io/" target="_blank" rel="noopener noreferrer" class="font-medium text-accent hover:text-accent-dark">PX4 Autopilot</a>
             and
             <a href="https://ardupilot.org/" target="_blank" rel="noopener noreferrer" class="font-medium text-accent hover:text-accent-dark">ArduPilot</a>.
@@ -180,7 +200,7 @@
         <div>
           <h3 class="font-semibold text-gray-900">AI-assisted development workflow</h3>
           <p class="mt-2">
-            Used AI tools (primarily Claude via terminal) to accelerate development and debugging, including:
+            Used AI tools (primarily Claude via Cursor) to accelerate development and debugging, including:
           </p>
           <ul class="mt-3 list-disc space-y-1 pl-5">
             <li>rapid iteration on control architectures</li>
@@ -189,24 +209,24 @@
             <li>validating control logic against expected UAV behavior</li>
           </ul>
           <p class="mt-3">
-            AI was used as an engineering assistant, not a replacement for understanding—each component was derived, implemented, and validated independently.
+            AI was used as an engineering assistant, not a replacement for understanding&mdash;each component was derived, implemented, and validated independently.
           </p>
         </div>
 
         <div>
           <h3 class="font-semibold text-gray-900">Integration &amp; testing</h3>
-          <p class="mt-2 font-medium text-gray-800">Validated controller performance through simulation by:</p>
+          <p class="mt-2 font-medium text-gray-800">Validated system performance through simulation:</p>
           <ul class="mt-2 list-disc space-y-1 pl-5">
-            <li>initializing the drone at large attitude disturbances (e.g., 45&deg; roll/pitch)</li>
-            <li>verifying rapid stabilization to zero attitude</li>
-            <li>testing position convergence to arbitrary reference points</li>
-            <li>comparing desired vs. actual accelerations to evaluate controller behavior</li>
+            <li>Stabilization from large initial disturbances (e.g., 45&deg; roll/pitch).</li>
+            <li>Smooth waypoint traversal using quintic trajectories.</li>
+            <li>Tracking performance under wind disturbances.</li>
+            <li>Comparison of desired vs. actual position, velocity, and acceleration.</li>
           </ul>
           <p class="mt-4 font-medium text-gray-800">Used data visualization (Matplotlib) to analyze:</p>
           <ul class="mt-2 list-disc space-y-1 pl-5">
-            <li>position, velocity, and attitude over time</li>
-            <li>control inputs and system response</li>
-            <li>tracking performance and transient behavior</li>
+            <li>trajectory tracking accuracy</li>
+            <li>control effort and actuator behavior</li>
+            <li>transient response and stability margins</li>
           </ul>
         </div>
 
@@ -217,11 +237,12 @@
     <section class="mt-12" aria-labelledby="results-heading">
       <h2 id="results-heading" class="text-xl font-bold text-gray-900">Results &amp; lessons learned</h2>
       <ul class="mt-4 list-disc space-y-3 pl-5 text-base leading-relaxed text-gray-600">
-        <li>Cascaded control significantly improves stability and modularity compared to single-loop designs.</li>
-        <li>Mapping acceleration to attitude is critical for realistic quadrotor behavior.</li>
-        <li>Controller tuning must account for coupling between translational and rotational dynamics.</li>
-        <li>Numerical artifacts (e.g., acceleration spikes) can arise from initialization and must be carefully interpreted.</li>
-        <li>Clean software architecture is essential as system complexity grows.</li>
+        <li>Trajectory generation is essential for stable, realistic quadrotor motion&mdash;waypoints alone are insufficient.</li>
+        <li>Feedforward acceleration dramatically reduces controller workload and improves tracking.</li>
+        <li>Time-scaling (trajectory duration) directly impacts system stability and physical feasibility.</li>
+        <li>Cascaded control architectures provide modularity and robustness.</li>
+        <li>Coupling between translational and rotational dynamics must be carefully managed.</li>
+        <li>Clean software structure becomes critical as autonomy features are added.</li>
       </ul>
     </section>
 
@@ -229,10 +250,11 @@
     <section class="mt-12" aria-labelledby="next-steps-heading">
       <h2 id="next-steps-heading" class="text-xl font-bold text-gray-900">Next steps</h2>
       <ul class="mt-4 list-disc space-y-2 pl-5 text-base leading-relaxed text-gray-600">
-        <li>Implement outer-loop trajectory generation (splines / minimum-jerk paths).</li>
+        <li>Implement minimum-snap trajectory optimization for aggressive flight.</li>
         <li>Add state estimation using a Kalman filter.</li>
-        <li>Introduce disturbances (wind, sensor noise) for realism.</li>
-        <li>Expand to waypoint navigation and autonomous mission planning.</li>
+        <li>Incorporate sensor noise and richer environmental disturbances.</li>
+        <li>Extend to real-time path planning (A*, RRT*) with obstacle avoidance.</li>
+        <li>Introduce yaw trajectory tracking and full 3D orientation control.</li>
       </ul>
     </section>
 
