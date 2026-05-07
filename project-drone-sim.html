@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="First-principles 6-DOF quadrotor simulation with cascaded control, quintic trajectory generation, and EKF-based state estimation — Riley Martin." />
+  <meta name="description" content="First-principles 6-DOF quadrotor simulation with cascaded control, quintic trajectory generation, and a 16-state error-state EKF fusing IMU, GPS, and magnetometer for full-state estimation — Riley Martin." />
   <title>Autonomous UAV Simulation &amp; Control | Riley Martin</title>
 
   <link rel="preconnect" href="https://fonts.googleapis.com" />
@@ -45,17 +45,18 @@
       <p class="text-xs font-semibold uppercase tracking-wide text-accent">Individual project · Deep dive</p>
       <h1 class="mt-2 text-3xl font-bold tracking-tight text-gray-900 sm:text-4xl">Autonomous UAV simulation &amp; control</h1>
       <p class="mt-3 text-lg text-gray-600">
-        A first-principles 6-DOF quadrotor simulation with cascaded control, trajectory generation, and EKF-based state estimation.
+        A first-principles 6-DOF quadrotor simulation with cascaded control, quintic trajectory generation, and a full-state error-state EKF that fuses IMU, GPS, and magnetometer to estimate position, velocity, attitude, and IMU biases &mdash; the same architecture used by PX4 and ArduPilot.
       </p>
       <ul class="mt-6 flex flex-wrap gap-2 text-sm">
         <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Python</li>
         <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Controls</li>
         <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Trajectory generation</li>
         <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Simulation</li>
-        <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">State Estimation (EKF)</li>
+        <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">State Estimation (ESKF)</li>
+        <li class="rounded-full border border-gray-200 bg-gray-50 px-3 py-1 font-medium text-gray-700">Sensor fusion</li>
       </ul>
       <p class="mt-6 text-sm text-gray-500">
-        <span class="font-semibold text-gray-700">Role:</span> Dynamics, Controls, Trajectory Planning, Software Architecture · 2026
+        <span class="font-semibold text-gray-700">Role:</span> Dynamics, Controls, Trajectory Planning, State Estimation, Software Architecture · 2026
       </p>
       <a
         href="https://github.com/rileytm12/6DOF_Drone_Sim.git"
@@ -72,13 +73,13 @@
       <h2 id="overview-heading" class="text-xl font-bold text-gray-900">Overview</h2>
       <div class="mt-4 space-y-4 text-base leading-relaxed text-gray-600">
         <p>
-          This project develops a high-fidelity quadrotor (UAV) simulation from first principles, with a focus on control system design, trajectory generation, and state estimation. The system models full 6-DOF rigid body dynamics using quaternion-based attitude representation and simulates real-time vehicle response to control inputs.
+          This project develops a high-fidelity quadrotor (UAV) simulation from first principles, focused on control system design, trajectory generation, and full-state estimation. The system models full 6-DOF rigid body dynamics using a quaternion-based attitude representation and simulates real-time vehicle response to control inputs and disturbances.
         </p>
         <p>
           The architecture evolves beyond simple setpoint stabilization into a structured autonomous flight stack. Rather than commanding discrete position targets, the system generates smooth, time-parameterized trajectories (position, velocity, acceleration), enabling dynamically feasible motion.
         </p>
         <p>
-          To better reflect real-world UAV systems, control is performed on an estimated state rather than ground truth. An Extended Kalman Filter (EKF) fuses noisy IMU and GPS measurements to recover position and velocity, introducing realistic sensor noise, drift, and correction behavior.
+          To better reflect real-world UAV systems, control is performed on an estimated state rather than ground truth. An error-state Extended Kalman Filter (ESKF) fuses noisy accelerometer, gyroscope, GPS, and magnetometer measurements to recover the full vehicle state &mdash; position, velocity, attitude, and IMU biases &mdash; using the same architecture found in PX4&rsquo;s <code class="font-mono text-sm">ekf2</code> and ArduPilot&rsquo;s <code class="font-mono text-sm">EKF3</code>.
         </p>
         <p>
           The overall goal is to mirror real UAV flight software by explicitly building each layer&mdash;from dynamics and estimation to control and planning&mdash;within a modular and extensible architecture.
@@ -124,40 +125,63 @@
             <p>a<sub>z</sub> &rarr; thrust</p>
           </div>
           <p class="mt-3">
-            This enables tracking of dynamically consistent trajectories rather than static setpoints.
+            This enables tracking of dynamically consistent trajectories rather than static setpoints. All controllers consume the EKF&rsquo;s estimated state &mdash; not ground truth &mdash; so they must remain stable under estimator noise, lag, and bias residuals, the same way they would on real hardware.
           </p>
         </div>
 
         <div>
-          <h3 class="font-semibold text-gray-900">State estimation (Extended Kalman Filter)</h3>
+          <h3 class="font-semibold text-gray-900">State estimation (Error-State Extended Kalman Filter)</h3>
           <p class="mt-2">
-            Implemented a 6-state Extended Kalman Filter (EKF) to estimate translational position and velocity from noisy sensor measurements.
+            Implemented a full error-state Extended Kalman Filter (ESKF) that estimates the entire vehicle state from noisy IMU, GPS, and magnetometer measurements &mdash; the same architecture used by production flight stacks.
           </p>
-          <p class="mt-3 font-medium text-gray-800">State vector:</p>
+
+          <p class="mt-4 font-medium text-gray-800">Nominal state (16 elements):</p>
           <div class="mt-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-center font-mono text-sm text-gray-800">
-            [x, y, z, v<sub>x</sub>, v<sub>y</sub>, v<sub>z</sub>]
+            [ p (3), &nbsp; v (3), &nbsp; q (4), &nbsp; b<sub>g</sub> (3), &nbsp; b<sub>a</sub> (3) ]
+          </div>
+          <ul class="mt-3 list-disc space-y-1 pl-5 text-sm">
+            <li><span class="font-mono">p, v</span>: position and velocity in the world frame</li>
+            <li><span class="font-mono">q</span>: orientation quaternion (Hamilton, body &rarr; world)</li>
+            <li><span class="font-mono">b<sub>g</sub>, b<sub>a</sub></span>: gyroscope and accelerometer biases (body frame)</li>
+          </ul>
+
+          <p class="mt-4 font-medium text-gray-800">Error state (15 elements):</p>
+          <div class="mt-2 rounded-lg border border-gray-200 bg-gray-50 px-4 py-3 text-center font-mono text-sm text-gray-800">
+            [ &delta;p, &nbsp; &delta;v, &nbsp; &delta;&theta;, &nbsp; &delta;b<sub>g</sub>, &nbsp; &delta;b<sub>a</sub> ]
           </div>
           <p class="mt-3">
-            The prediction step uses a constant-acceleration motion model driven by IMU measurements, while GPS provides intermittent position updates. The filter operates in a multi-rate setting, with high-frequency IMU updates and lower-rate GPS corrections.
+            The attitude error <span class="font-mono text-sm">&delta;&theta;</span> is parameterized as a 3-vector rotation perturbation, keeping the linearized covariance update on a true vector space and away from the unit-norm constraint on the quaternion. After each measurement update, the error correction is &ldquo;injected&rdquo; into the nominal quaternion via a small-angle multiplication and the error state is reset to zero.
           </p>
-          <p class="mt-3 font-medium text-gray-800">Key features:</p>
+
+          <p class="mt-4 font-medium text-gray-800">Prediction (IMU-driven, 100 Hz):</p>
           <ul class="mt-2 list-disc space-y-1 pl-5">
-            <li>Sensor fusion of noisy GPS (position) and IMU (acceleration) data</li>
-            <li>Velocity estimation without direct velocity measurements</li>
-            <li>Process noise modeled from continuous-time white acceleration</li>
-            <li>Numerically stable covariance update using Joseph form</li>
-            <li>Modular predict/update structure integrated into the simulation loop</li>
+            <li>Accelerometer reads body-frame specific force <span class="font-mono text-sm">f = R(q)<sup>T</sup>(a<sub>world</sub> &minus; g<sub>world</sub>) + b<sub>a</sub> + n<sub>a</sub></span></li>
+            <li>Gyroscope reads body-frame angular rate <span class="font-mono text-sm">&omega; = &omega;<sub>body</sub> + b<sub>g</sub> + n<sub>g</sub></span></li>
+            <li>Bias-corrected IMU drives both nominal-state propagation and the linearized covariance step <span class="font-mono text-sm">F P F<sup>T</sup> + Q</span></li>
           </ul>
-          <p class="mt-3">
-            This introduces realistic estimator behavior: uncertainty grows during prediction and contracts upon measurement updates.
+
+          <p class="mt-4 font-medium text-gray-800">Measurement updates:</p>
+          <ul class="mt-2 list-disc space-y-1 pl-5">
+            <li><span class="font-semibold text-gray-800">GPS (10 Hz):</span> observes world-frame position; corrects <span class="font-mono text-sm">p</span> directly and bias / attitude indirectly through cross-covariance</li>
+            <li><span class="font-semibold text-gray-800">Magnetometer (50 Hz):</span> observes a body-frame heading reference <span class="font-mono text-sm">m<sub>body</sub> = R(q)<sup>T</sup> m<sub>world</sub></span>, with Jacobian <span class="font-mono text-sm">&part;h/&part;&delta;&theta; = R(q)<sup>T</sup>[m<sub>world</sub>]<sub>&times;</sub></span></li>
+            <li>Joseph-form covariance update on every step for numerical robustness</li>
+          </ul>
+
+          <p class="mt-4">
+            The magnetometer is what makes yaw observable. With GPS + IMU alone the gyro z-bias is unobservable, so yaw drifts unboundedly; adding a horizontal heading reference locks down yaw, exposes the gyro z-bias, and lets attitude integrate cleanly &mdash; a chain that cascades into better velocity and position estimates.
           </p>
-          <p class="mt-3 font-medium text-gray-800">Performance results:</p>
+
+          <p class="mt-4 font-medium text-gray-800">Performance (closed-loop, with realistic IMU bias and noise):</p>
           <ul class="mt-2 list-disc space-y-1 pl-5">
-            <li>Position RMSE reduced from ~0.5 m (raw GPS noise) to ~0.13 m after filtering</li>
-            <li>Velocity estimated to ~0.05 m/s accuracy without direct measurement</li>
+            <li>Position RMSE: <span class="font-mono text-sm">~0.09 m</span> &nbsp; (vs <span class="font-mono text-sm">~0.30 m</span> raw GPS noise)</li>
+            <li>Velocity RMSE: <span class="font-mono text-sm">~0.07 m/s</span> &nbsp; (no direct velocity sensor)</li>
+            <li>Attitude RMSE: roll <span class="font-mono text-sm">0.7&deg;</span>, pitch <span class="font-mono text-sm">0.2&deg;</span>, yaw <span class="font-mono text-sm">0.25&deg;</span></li>
+            <li>Gyro-bias estimates converge to within <span class="font-mono text-sm">~5%</span> of injected truth on all three axes</li>
+            <li>Accelerometer-bias <span class="font-mono text-sm">b<sub>a,z</sub></span> converges fastest (gravity excites it in hover); horizontal components converge during commanded translations</li>
           </ul>
+
           <p class="mt-3">
-            Visualization includes truth vs. noisy measurements vs. EKF estimate, with &plusmn;3&sigma; covariance bounds, as well as velocity reconstruction purely from sensor fusion.
+            Visualization (10 figures) includes 3D trajectory, position / velocity tracking, attitude vs time, position and velocity error vs time with raw sensor and EKF <span class="font-mono text-sm">&plusmn;3&sigma;</span> bounds, attitude error vs time, and bias-estimate convergence overlaid on the (known) injected truth biases.
           </p>
           <p class="mt-3">
             This shifts the system from full-state feedback to estimate-driven control, aligning with real-world flight systems.
@@ -204,18 +228,19 @@
 ├── dynamics_fun.py                     # 6-DOF rigid body dynamics (quaternion)
 ├── integrator_fun.py                   # numerical state integrator
 ├── disturbances_fun.py                 # wind / gust disturbance model
-├── sensors_fun.py                      # noisy GPS &amp; IMU sensor models
 ├── controllers/
 │   ├── outerLoop.py                    # position control + waypoint manager
 │   ├── innerLoop.py                    # attitude control (roll, pitch, yaw)
 │   ├── trajectoryGeneration_fun.py     # quintic polynomial trajectory generator
 │   └── PID.py                          # reusable PID class with anti-windup
 ├── estimators/
-│   └── KF_translation.py               # 6-state EKF for position &amp; velocity
+│   ├── sensors_fun.py                  # GPS, accelerometer, gyroscope, magnetometer
+│   ├── EKF_full.py                     # 16-state ESKF (position, velocity, attitude, biases)
+│   └── KF_translation.py               # legacy 6-state KF (translational only, archival)
 └── transform/
     ├── quat2euler_fun.py               # quaternion &rarr; Euler angles
     ├── euler2quat_fun.py               # Euler angles &rarr; quaternion
-    ├── body2global_fun.py               # body &rarr; world frame rotation
+    ├── body2global_fun.py              # body &rarr; world frame rotation
     ├── angularAccel_fun.py             # rotational dynamics (Euler&rsquo;s equation)
     └── Tcalc_fun.py                    # mixer: total thrust + torques &rarr; rotor thrusts</pre>
           </div>
@@ -242,15 +267,18 @@
 
         <div>
           <h3 class="font-semibold text-gray-900">Integration &amp; testing</h3>
-          <p class="mt-2 font-medium text-gray-800">Validated system performance through simulation:</p>
+          <p class="mt-2 font-medium text-gray-800">Validated end-to-end system performance through simulation:</p>
           <ul class="mt-2 list-disc space-y-1 pl-5">
             <li>Stabilization from large initial disturbances (e.g., 45&deg; roll/pitch).</li>
             <li>Smooth waypoint traversal using quintic trajectories.</li>
-            <li>Robust tracking under wind disturbances.</li>
-            <li>Estimator performance evaluated using RMSE and covariance bounds.</li>
+            <li>Robust tracking under wind and gust disturbances.</li>
+            <li>Closed-loop control on EKF-estimated state (no truth feedback).</li>
+            <li>Estimator validated via position / velocity / attitude RMSE and <span class="font-mono text-sm">&plusmn;3&sigma;</span> covariance bounds.</li>
+            <li>IMU bias-estimate convergence verified against the (known) injected truth biases.</li>
+            <li>Magnetometer-aided yaw observability confirmed by ablation: removing the mag update collapses yaw RMSE from <span class="font-mono text-sm">~0.25&deg;</span> back to <span class="font-mono text-sm">&gt;20&deg;</span>.</li>
           </ul>
           <p class="mt-3">
-            Used data visualization (Matplotlib) to analyze trajectory tracking, control effort, and transient response.
+            Used data visualization (Matplotlib) to analyze trajectory tracking, control effort, transient response, and estimator behavior. A subtle IMU/control timing bug &mdash; sampling the gyro before truth integration introduced a one-step lag in the body-rate hand-off, destabilizing the inner loop on aggressive maneuvers &mdash; was caught through targeted instrumented runs and fixed by sampling a fresh post-integration gyro reading specifically for the controller.
           </p>
         </div>
 
@@ -261,12 +289,14 @@
     <section class="mt-12" aria-labelledby="results-heading">
       <h2 id="results-heading" class="text-xl font-bold text-gray-900">Results &amp; lessons learned</h2>
       <ul class="mt-4 list-disc space-y-3 pl-5 text-base leading-relaxed text-gray-600">
-        <li>Trajectory generation is essential for stable quadrotor motion.</li>
-        <li>Feedforward acceleration significantly improves tracking performance.</li>
-        <li>Estimation enables realistic control under sensor uncertainty.</li>
-        <li>Multi-rate sensor fusion introduces nontrivial system dynamics.</li>
-        <li>Cascaded control provides modularity and robustness.</li>
-        <li>Clean software structure is critical as autonomy complexity increases.</li>
+        <li>Time-parameterized trajectories (not raw waypoint setpoints) are essential for stable, dynamically feasible flight.</li>
+        <li>Feedforward acceleration from the trajectory generator significantly reduces controller workload and improves tracking.</li>
+        <li>The error-state form of the EKF keeps attitude perturbations on a clean vector space and avoids fighting the unit-norm constraint on the quaternion.</li>
+        <li>Driving the EKF with raw inertial measurements (specific force + angular rate) rather than pre-conditioned acceleration mirrors real flight stacks but exposes timing and convention pitfalls &mdash; quaternion convention, perturbation side, IMU sample timing, and controller hand-off must all line up end-to-end.</li>
+        <li>Yaw is unobservable from GPS + IMU alone. A heading reference (magnetometer here, velocity-direction in fixed-wing) is required, and adding it cascades into better gyro-bias, attitude, velocity, and position estimates.</li>
+        <li>IMU-bias observability is asymmetric &mdash; each bias component converges only as fast as that axis is excited (vertical accel bias in hover, horizontal accel bias during translation, gyro biases via yaw / mag updates).</li>
+        <li>Cascaded control provides modularity, but each layer has to be robust to the noise and lag of the layer below it. Tuning that&rsquo;s clean against truth-state feedback is not automatically clean against estimator-state feedback.</li>
+        <li>Clean module boundaries (dynamics &harr; sensors &harr; estimator &harr; control &harr; trajectory) made it possible to swap a 6-state translational KF for a 16-state ESKF without touching the controllers.</li>
       </ul>
     </section>
 
@@ -274,11 +304,12 @@
     <section class="mt-12" aria-labelledby="next-steps-heading">
       <h2 id="next-steps-heading" class="text-xl font-bold text-gray-900">Next steps</h2>
       <ul class="mt-4 list-disc space-y-2 pl-5 text-base leading-relaxed text-gray-600">
-        <li>Extend estimation to full 6-DOF (attitude and sensor bias estimation).</li>
-        <li>Implement minimum-snap trajectory optimization for aggressive flight.</li>
-        <li>Incorporate richer sensor models and environmental disturbances.</li>
-        <li>Add real-time path planning (A*, RRT*) with obstacle avoidance.</li>
-        <li>Introduce full 3D orientation and yaw trajectory tracking.</li>
+        <li>Add a slow random walk to the injected IMU biases so the estimator has to track a moving target instead of a constant.</li>
+        <li>Magnetic-inclination model with a vertical field component, and a magnetometer-disturbance / hard-iron rejection step.</li>
+        <li>Visual-inertial odometry (camera-aided pose estimation) for GPS-denied flight.</li>
+        <li>Asynchronous / out-of-order sensor handling with latency-compensated measurement updates.</li>
+        <li>Minimum-snap trajectory optimization for aggressive flight, with full 3D yaw tracking.</li>
+        <li>Real-time path planning (A*, RRT*) with obstacle avoidance feeding the trajectory generator.</li>
       </ul>
     </section>
 
